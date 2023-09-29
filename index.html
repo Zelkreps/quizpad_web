@@ -18,6 +18,11 @@
     h1 {
         text-align: center;
     }
+
+    .ellipses {
+      word-break: break-all;
+      text-wrap: balance;
+    }
   </style>
 
 </head>
@@ -34,7 +39,11 @@
           <br></br>
 
           <div class="form-group">
-              <input type="text" id="question" class="form-control" placeholder="Zadejte otázku">
+              <input type="text" id="question" class="form-control" placeholder="Otázka">
+          </div>
+
+          <div class="form-group">
+            <input type="url" id="questionImage" class="form-control" placeholder="URL obrázku">
           </div>
           
           <div class="form-group">
@@ -48,7 +57,7 @@
 
           <br><br>
 
-          <div id="tableContainer"></div>
+          <div class="ellipses row p-4" id="tableContainer"></div>
         </div>
         
         <div class="col-md-6 p-4">

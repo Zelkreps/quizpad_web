@@ -21,6 +21,11 @@ function showInputType() {
 
     inputContainer.appendChild(row);
   } else if (selectBox.value === "multi") {
+    var answerImage = document.createElement("input");
+    answerImage.type = "url";
+    answerImage.className = "form-control mx-3 mt-3";
+    answerImage.placeholder = "URL obrázku";
+
     var toggleButton = document.createElement("button");
     toggleButton.className = "btn btn-outline-dark";
     toggleButton.innerHTML = "❌";
@@ -44,6 +49,7 @@ function showInputType() {
     addButton.innerHTML = "Přidat";
     addButton.className = "btn btn-primary";
     addButton.onclick = function () {
+      var image = answerImage.value;
       var answer = answerInput.value;
       var isTrue = isChecked;
 
@@ -62,8 +68,13 @@ function showInputType() {
         var answerCell = document.createElement("td");
         answerCell.textContent = answer;
 
+        var imageCell = document.createElement("td");
+        imageCell.style.textAlign = "right";
+        imageCell.textContent = image;
+
         row.appendChild(icon);
         row.appendChild(answerCell);
+        row.appendChild(imageCell);
 
         tbody.appendChild(row);
         table.appendChild(tbody);
@@ -71,6 +82,7 @@ function showInputType() {
         tableContainer.appendChild(table);
 
         answerInput.value = "";
+        answerImage.value = "";
       }
     };
 
@@ -89,6 +101,8 @@ function showInputType() {
     row.appendChild(col2);
     row.appendChild(col3);
 
+    row.appendChild(answerImage);
+
     inputContainer.appendChild(row);
   }
 }
@@ -102,10 +116,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
 function resetForm() {
   var questionInput = document.getElementById("question");
+  var questionImage = document.getElementById("questionImage");
   var inputContainer = document.getElementById("inputContainer");
   var tableContainer = document.getElementById("tableContainer");
 
   questionInput.value = "";
+  questionImage.value = "";
   inputContainer.innerHTML = "";
   tableContainer.innerHTML = "";
 
@@ -115,6 +131,7 @@ function resetForm() {
 function submitForm() {
   var question = document.getElementById("question").value;
   var answerType = document.getElementById("answerType").value;
+  var questionImage = document.getElementById("questionImage").value;
   var answers = [];
   var formData = [];
 
@@ -155,11 +172,15 @@ function submitForm() {
       .querySelector("input[type='text']");
 
     var answerObject = {
-      content: openAnswerInput.value,
+      answer: openAnswerInput.value,
     };
 
     answers.push(answerObject);
   } else if (answerType === "multi") {
+    var answerImageInput = document
+      .getElementById("inputContainer")
+      .querySelector("input[type='url']");
+
     var tableRows = document
       .getElementById("tableContainer")
       .querySelectorAll("tr");
@@ -169,7 +190,7 @@ function submitForm() {
       var cells = tableRow.getElementsByTagName("td");
 
       // Check if the table row contains the expected number of cells
-      if (cells.length !== 2) {
+      if (cells.length !== 3) {
         console.error(
           "Invalid table structure. Each row should have two cells."
         );
@@ -178,30 +199,51 @@ function submitForm() {
 
       var iconCell = cells[0];
       var answerCell = cells[1];
+      var imageCell = cells[2];
 
       var answerText = answerCell.textContent.trim();
+      var imageUrl = imageCell.textContent.trim();
       var isTrue = iconCell.textContent === "✔";
 
       var answerObject = {
-        content: answerText,
-        isAnswerRight: isTrue,
+        answer: answerText,
+        isRight: isTrue,
       };
+
+      if (imageUrl != "") {
+        answerObject.image = {
+          imageType: "url",
+          path: imageUrl,
+        };
+      }
 
       answers.push(answerObject);
     }
   }
 
+  // Vytvoření objektu question
+  let questionObj = {
+    question: question,
+    runtimeType: answerType === "open" ? "open" : "multiple",
+  };
+
+  // Přidání odpovědi podle typu otázky
   if (answerType === "open") {
-    formData.push({
-      question: question,
-      answer: answers[0],
-    });
+    questionObj.answer = answers[0];
   } else if (answerType === "multi") {
-    formData.push({
-      question: question,
-      answers: answers,
-    });
+    questionObj.answers = answers;
   }
+
+  // Přidání objektu image, pokud questionImage není prázdný
+  if (questionImage !== "") {
+    questionObj.image = {
+      imageType: "url",
+      path: questionImage,
+    };
+  }
+
+  // Přidání questionObj do formData
+  formData.push(questionObj);
 
   var jsonString = JSON.stringify(formData, null, 2);
   document.getElementById("jsonOutput").innerText = jsonString;
