@@ -224,15 +224,11 @@ function submitForm() {
   // Vytvoření objektu question
   let questionObj = {
     question: question,
-    runtimeType: answerType === "open" ? "open" : "multiple",
+    type: answerType === "open" ? "open" : "multiple",
   };
 
   // Přidání odpovědi podle typu otázky
-  if (answerType === "open") {
-    questionObj.answer = answers[0];
-  } else if (answerType === "multi") {
-    questionObj.answers = answers;
-  }
+  questionObj.answers = answers;
 
   // Přidání objektu image, pokud questionImage není prázdný
   if (questionImage !== "") {
